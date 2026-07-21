@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>杨欣雨的个人空间</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #fcd5d9;
+            color: #333;
+            padding: 20px;
+            padding-top: 80px;
+        }
+        .header {
+            max-width: 800px;
+            margin: 0 auto 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 16px 28px;
+            border-radius: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+        .header h1 { font-size: 22px; color: #1a73e8; }
+        .header .nav a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #666;
+            font-size: 14px;
+        }
+        .header .nav a:hover { color: #1a73e8; }
+        .publish-area {
+            max-width: 800px;
+            margin: 0 auto 20px;
+            display: flex;
+            justify-content: flex-end;
+        }
+        .btn-publish {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 24px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-publish:hover {
+            background: #1557b0;
+            transform: scale(1.02);
+        }
+        .post-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .post-card {
+            background: white;
+            padding: 28px 32px;
+            margin-bottom: 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        .post-card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        .post-card .post-meta {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+        .post-card .post-body {
+            font-size: 15px;
+            line-height: 1.8;
+            color: #555;
+        }
+        .comment-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #eee;
+        }
+        .comment-section .comment-input-area {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .comment-section .comment-input-area input {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid #ddd;
+            border-radius: 24px;
+            font-size: 14px;
+            outline: none;
+        }
+        .comment-section .comment-input-area input:focus {
+            border-color: #1a73e8;
+        }
+        .comment-section .comment-input-area button {
+            padding: 10px 20px;
+            background: #1a73e8;
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .comment-section .comment-input-area button:hover {
+            background: #1557b0;
+        }
+        .comment-list {
+            list-style: none;
+            padding: 0;
+        }
+        .comment-list li {
+            background: #f7f9fc;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #444;
+        }
+        .comment-list li::before { content: "💬 "; }
+        .empty-tip {
+            text-align: center;
+            color: #999;
+            padding: 60px 0;
+            font-size: 16px;
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: white;
+            padding: 32px 36px;
+            border-radius: 20px;
+            width: 440px;
+            max-width: 92%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-box h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+        .modal-box input,
+        .modal-box textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 14px;
+            font-family: inherit;
+            outline: none;
+        }
+        .modal-box input:focus,
+        .modal-box textarea:focus {
+            border-color: #1a73e8;
+        }
+        .modal-box textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        .modal-box .modal-actions button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 24px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .modal-box .modal-actions .btn-cancel {
+            background: #f0f2f5;
+            color: #666;
+        }
+        .modal-box .modal-actions .btn-confirm {
+            background: #1a73e8;
+            color: white;
+        }
+        .modal-box .modal-actions .btn-confirm:hover {
+            background: #1557b0;
+        }
+        .fixed-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 12px 40px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 999;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .fixed-nav .brand {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .fixed-nav .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+        .fixed-nav .nav-links a {
+            text-decoration: none;
+            color: #374151;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        .fixed-nav .nav-links button {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="fixed-nav">
+        <a href="#" class="brand">🚀 我的作品集</a>
+        <div class="nav-links">
+            <a href="#">首页</a>
+            <a href="#">项目</a>
+            <a href="#">关于</a>
+            <button id="themeToggle">🌙</button>
+        </div>
+    </nav>
+
+    <div class="header">
+        <h1 id="siteTitle">📝 我的博客</h1>
+        <div class="nav">
+            <input id="searchInput" placeholder="🔍 搜索文章..." oninput="searchPosts()" style="padding:8px 16px; border-radius:24px; border:2px solid #f0b8c0; outline:none; font-size:14px; width:180px;" />
+        </div>
+    </div>
+
+    <div class="publish-area">
+        <button class="btn-publish" onclick="openPublish()">✏️ 写文章</button>
+    </div>
+
+    <div class="post-list" id="postList"></div>
+
+    <div class="modal-overlay" id="publishModal">
+        <div class="modal-box">
+            <h3>✏️ 发布新文章</h3>
+            <input id="postTitle" placeholder="标题（必填）" />
+            <textarea id="postBody" placeholder="正文内容（必填）"></textarea>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closePublish()">取消</button>
+                <button class="btn-confirm" onclick="confirmPublish()">发布</button>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align:center; padding:20px; color:#999; font-size:14px;">
+        👀 今日访客：<span class="visitorCount"></span> 人
+    </div>
+
+    <footer style="margin-top:60px; padding:30px 40px; border-top:1px solid #e5e7eb; text-align:center; color:#9ca3af; font-size:14px;">
+        <p>© 2026 我的作品集 · 用 ❤️ 和 HTML 搭建</p>
+    </footer>
+
+    <script>
+        // ===== 数据管理（localStorage 备用） =====
+        function getPosts() {
+            const saved = localStorage.getItem('myBlogPosts');
+            return saved ? JSON.parse(saved) : [
+                { id: 1, title: '今天学了数据库', body: '数据库基础：SQL语句的分类', date: '2026-07-17', comments: ['加油！'] },
+                { id: 2, title: 'JavaScript 比想象中有趣', body: '点击按钮弹出提示', date: '2026-07-17', comments: ['哈哈哈哈我也是！'] }
+            ];
+        }
+
+        function savePosts(posts) {
+            localStorage.setItem('myBlogPosts', JSON.stringify(posts));
+        }
+
+        // ===== 核心渲染函数（从后端读取数据） =====
+        function render() {
+            const container = document.getElementById('postList');
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">⏳ 加载中...</div>';
+
+            fetch('http://localhost:3000/api/posts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('网络响应异常，状态码：' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    if (!posts || posts.length === 0) {
+                        container.innerHTML = `<div class="empty-tip">📭 还没有文章</div>`;
+                        return;
+                    }
+                    let html = '';
+                    for (let i = 0; i < posts.length; i++) {
+                        const p = posts[i];
+                        let commentsHtml = '';
+                        if (p.comments && p.comments.length > 0) {
+                            for (let j = 0; j < p.comments.length; j++) {
+                                commentsHtml += `<li>${p.comments[j]}</li>`;
+                            }
+                        }
+                        html += `
+                            <div class="post-card">
+                                <h2>${p.title || '无标题'}</h2>
+                                <div class="post-meta">📅 发布于 ${p.date || '2026-07-17'}</div>
+                                <div class="post-body">${p.body || ''}</div>
+                                <div class="comment-section">
+                                    <div class="comment-input-area">
+                                        <input id="commentInput_${p.id}" placeholder="说点什么..." />
+                                        <button onclick="addComment(${p.id})">评论</button>
+                                    </div>
+                                    <ul class="comment-list">${commentsHtml}</ul>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    container.innerHTML = html;
+                    updateVisitor();
+                })
+                .catch(error => {
+                    console.error('加载文章失败:', error);
+                    container.innerHTML = `
+                        <div class="empty-tip" style="color:#e74c3c;">
+                            ⚠️ 无法连接后端<br>
+                            <span style="font-size:14px;color:#999;">请确认后端已启动：node server.js</span>
+                            <br><span style="font-size:12px;color:#999;">错误详情：${error.message}</span>
+                        </div>
+                    `;
+                });
+        }
+
+        // ===== 评论功能 =====
+        function addComment(postId) {
+            const input = document.getElementById('commentInput_' + postId);
+            const text = input.value.trim();
+            if (!text) return alert('评论不能为空');
+            const posts = getPosts();
+            const post = posts.find(p => p.id === postId);
+            if (!post) return alert('文章不存在');
+            post.comments.push(text);
+            savePosts(posts);
+            render();
+        }
+
+        // ===== 发布文章 =====
+        function openPublish() {
+            document.getElementById('publishModal').classList.add('active');
+            document.getElementById('postTitle').value = '';
+            document.getElementById('postBody').value = '';
+        }
+
+        function closePublish() {
+            document.getElementById('publishModal').classList.remove('active');
+        }
+
+        function confirmPublish() {
+    const title = document.getElementById('postTitle').value.trim();
+    const body = document.getElementById('postBody').value.trim();
+    if (!title || !body) return alert('标题和正文都不能为空');
+
+    // 1. 先存到 localStorage（保证自己能看到）
+    const posts = getPosts();
+    const maxId = posts.reduce((max, p) => Math.max(max, p.id || 0), 0);
+    const newPost = {
+        id: maxId + 1,
+        title: title,
+        body: body,
+        date: new Date().toISOString().slice(0, 10),
+        comments: []
+    };
+    posts.push(newPost);
+    savePosts(posts);
+
+    // 2. 同时发送给后端（让所有人都能看到）
+    fetch('http://localhost:3000/api/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newPost)
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log('后端保存成功:', data);
+        closePublish();
+        render();
+        alert('✅ 发布成功！');
+    })
+    .catch(err => {
+        console.error('后端保存失败:', err);
+        // 即使后端失败，localStorage 里已经存了，页面还能看到
+        closePublish();
+        render();
+        alert('✅ 已保存到本地，但后端连接失败，稍后会自动同步');
+    });
+}
+
+        // ===== 搜索功能 =====
+        function searchPosts() {
+    const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
+    const container = document.getElementById('postList');
+
+    if (!keyword) {
+        // 如果搜索框为空，直接调用 render() 从后端读取
+        render();
+        return;
+    }
+
+    // 从后端读取数据后再搜索
+    fetch('http://localhost:3000/api/posts')
+        .then(res => res.json())
+        .then(allPosts => {
+            const filtered = allPosts.filter(p =>
+                p.title.toLowerCase().includes(keyword) ||
+                p.body.toLowerCase().includes(keyword)
+            );
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-tip">🔍 没有找到“${keyword}”</div>`;
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i < filtered.length; i++) {
+                const p = filtered[i];
+                let commentsHtml = '';
+                for (let j = 0; j < (p.comments || []).length; j++) {
+                    commentsHtml += `<li>${p.comments[j]}</li>`;
+                }
+                html += `
+                    <div class="post-card">
+                        <h2>${p.title}</h2>
+                        <div class="post-meta">📅 发布于 ${p.date || '2026-07-17'}</div>
+                        <div class="post-body">${p.body}</div>
+                        <div class="comment-section">
+                            <div class="comment-input-area">
+                                <input id="commentInput_${p.id}" placeholder="说点什么..." />
+                                <button onclick="addComment(${p.id})">评论</button>
+                            </div>
+                            <ul class="comment-list">${commentsHtml}</ul>
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        })
+        .catch(() => {
+            container.innerHTML = `<div class="empty-tip">⚠️ 搜索失败，请稍后重试</div>`;
+        });
+}
+
+        // ===== 访客计数 =====
+        function updateVisitor() {
+            const today = new Date().toDateString();
+            let data = JSON.parse(localStorage.getItem('blogVisitor') || '{"date":"", "count":0}');
+            if (data.date !== today) { data.date = today; data.count = 0; }
+            data.count += 1;
+            localStorage.setItem('blogVisitor', JSON.stringify(data));
+            const el = document.querySelector('.visitorCount');
+            if (el) el.textContent = data.count;
+        }
+
+        // ===== 随机标题 =====
+        const titles = ['🌸 今天也要加油鸭', '🍵 摸鱼日记本', '✨ 碎碎念收容所', '☕️ 写代码不如喝咖啡'];
+        document.getElementById('siteTitle').innerHTML = '📝 ' + titles[Math.floor(Math.random() * titles.length)];
+
+        // ===== 启动 =====
+        render();
+    </script>
+</body>
+</html>
